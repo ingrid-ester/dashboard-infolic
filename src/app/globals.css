@@ -81,6 +81,8 @@
   --sidebar-accent-foreground: oklch(0.97 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.829 0.183 112.873 / 50%);
+  --gradient-brand: linear-gradient(135deg, oklch(0.506 0.112 250.058), oklch(0.829 0.183 112.873));
+  --gradient-page: radial-gradient(circle at 20% 0%, oklch(0.2 0.04 256), oklch(0.13 0.03 256) 60%);
 }
 
 @layer base {
@@ -89,6 +91,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: var(--gradient-page);
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;

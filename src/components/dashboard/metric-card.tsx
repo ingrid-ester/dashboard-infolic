@@ -20,7 +20,7 @@ const defaultFormat = (value: number) => value.toLocaleString("pt-BR");
 
 function IconBadge({ icon: Icon }: { icon: LucideIcon }) {
   return (
-    <div className="flex size-10 items-center justify-center rounded-full border border-accent/40 text-accent">
+    <div className="flex size-10 items-center justify-center rounded-full bg-[image:var(--gradient-brand)] text-primary-foreground">
       <Icon className="size-5" />
     </div>
   );
