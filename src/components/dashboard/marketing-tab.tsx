@@ -1,10 +1,10 @@
-import { WalletIcon } from "lucide-react";
+import { MousePointerClickIcon, WalletIcon } from "lucide-react";
 
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { SpendChart } from "@/components/dashboard/spend-chart";
 import { RankingTable } from "@/components/dashboard/ranking-table";
 
-type DailySpendPoint = { data: string; spend: number };
+type DailySpendPoint = { data: string; spend: number; leads: number };
 type VideoRetentionMetric = {
   adName: string;
   campaignName: string;
@@ -19,6 +19,10 @@ type VideoRetentionMetric = {
 type MarketingTabProps = {
   investimento: number;
   previousInvestimento: number;
+  leads: number;
+  previousLeads: number;
+  cpl: number | null;
+  previousCpl: number | null;
   dailySpend: DailySpendPoint[];
   videoRetention: VideoRetentionMetric[];
 };
@@ -31,6 +35,10 @@ const pctFormat = (value: number) => `${value.toFixed(1)}%`;
 export function MarketingTab({
   investimento,
   previousInvestimento,
+  leads,
+  previousLeads,
+  cpl,
+  previousCpl,
   dailySpend,
   videoRetention,
 }: MarketingTabProps) {
@@ -43,6 +51,20 @@ export function MarketingTab({
           previousValue={previousInvestimento}
           format={currencyFormat}
           icon={WalletIcon}
+        />
+        <MetricCard
+          label="Leads (cliques no link)"
+          value={leads}
+          previousValue={previousLeads}
+          icon={MousePointerClickIcon}
+        />
+        <MetricCard
+          label="CPL"
+          value={cpl}
+          previousValue={previousCpl}
+          format={currencyFormat}
+          invert
+          pendingReason="Sem leads no período"
         />
       </div>
 

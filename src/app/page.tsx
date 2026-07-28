@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { resolveComparisonPeriod, resolvePeriod } from "@/lib/dashboard/period";
-import { fetchDailySpend, fetchMetaSpend, fetchVideoRetention } from "@/lib/dashboard/queries";
+import { fetchDailySpend, fetchMetaLeads, fetchMetaSpend, fetchVideoRetention } from "@/lib/dashboard/queries";
 import { computeVideoRetention } from "@/lib/dashboard/metrics";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 
@@ -25,15 +25,21 @@ export default async function Home({ searchParams }: PageProps) {
     },
     investimento,
     previousInvestimento,
+    leads,
+    previousLeads,
     dailySpend,
     videoRetentionRows,
   ] = await Promise.all([
     supabase.auth.getUser(),
     fetchMetaSpend(supabase, period),
     fetchMetaSpend(supabase, previousPeriod),
+    fetchMetaLeads(supabase, period),
+    fetchMetaLeads(supabase, previousPeriod),
     fetchDailySpend(supabase, period),
     fetchVideoRetention(supabase),
   ]);
+  const cpl = leads > 0 ? investimento / leads : null;
+  const previousCpl = previousLeads > 0 ? previousInvestimento / previousLeads : null;
   const userName = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? "";
 
   const visaoGeralProps = {
@@ -45,6 +51,10 @@ export default async function Home({ searchParams }: PageProps) {
   const marketingProps = {
     investimento,
     previousInvestimento,
+    leads,
+    previousLeads,
+    cpl,
+    previousCpl,
     dailySpend,
     videoRetention: computeVideoRetention(videoRetentionRows),
   };

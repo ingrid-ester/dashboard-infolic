@@ -5,24 +5,35 @@ function getAdAccountId() {
   return id.startsWith("act_") ? id : `act_${id}`;
 }
 
-export type DailySpend = { data: string; spend: number };
+export type DailySpend = { data: string; spend: number; leads: number };
+
+type ActionValue = { action_type: string; value: string };
 
 type InsightsResponse = {
-  data: { date_start: string; spend: string }[];
+  data: { date_start: string; spend: string; actions?: ActionValue[] }[];
   paging?: { next?: string };
 };
 
+// No lead-gen pixel/form is configured on this account yet — campaigns
+// optimize for engagement/traffic. "link_click" is the closest available
+// stand-in for "someone showed interest" until a real lead event exists
+// (see the July 2026 decision to use it as "Leads" pending CRM).
+function linkClickCount(actions?: ActionValue[]): number {
+  const action = actions?.find((a) => a.action_type === "link_click");
+  return action ? Number(action.value) : 0;
+}
+
 /**
- * Reads account-level ad spend per day for [since, until] (inclusive,
- * "yyyy-MM-dd" strings). Follows pagination in case the range is split
- * across multiple pages.
+ * Reads account-level ad spend and link clicks (used as a Leads stand-in)
+ * per day for [since, until] (inclusive, "yyyy-MM-dd" strings). Follows
+ * pagination in case the range is split across multiple pages.
  */
 export async function getDailySpend(since: string, until: string): Promise<DailySpend[]> {
   const url = new URL(
     `https://graph.facebook.com/${GRAPH_API_VERSION}/${getAdAccountId()}/insights`,
   );
   url.searchParams.set("access_token", process.env.META_ACCESS_TOKEN ?? "");
-  url.searchParams.set("fields", "spend");
+  url.searchParams.set("fields", "spend,actions");
   url.searchParams.set("level", "account");
   url.searchParams.set("time_increment", "1");
   url.searchParams.set("time_range", JSON.stringify({ since, until }));
@@ -37,7 +48,7 @@ export async function getDailySpend(since: string, until: string): Promise<Daily
     }
     const body: InsightsResponse = await res.json();
     for (const row of body.data) {
-      results.push({ data: row.date_start, spend: Number(row.spend) });
+      results.push({ data: row.date_start, spend: Number(row.spend), leads: linkClickCount(row.actions) });
     }
     nextUrl = body.paging?.next ?? null;
   }
@@ -56,8 +67,6 @@ export type VideoRetentionRow = {
   p95: number;
   p100: number;
 };
-
-type ActionValue = { action_type: string; value: string };
 
 type VideoInsightsResponse = {
   data: {
