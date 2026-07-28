@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import Image from "next/image";
 import { HandshakeIcon, LayoutDashboardIcon, MegaphoneIcon } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,7 +27,7 @@ export function DashboardTabs({ visaoGeral, marketing }: DashboardTabsProps) {
     <Tabs defaultValue="visao-geral" orientation="vertical" className="min-h-svh w-full">
       <div className="flex w-60 shrink-0 flex-col justify-between border-r border-sidebar-border bg-sidebar px-4 py-6">
         <div className="flex flex-col gap-8">
-          <span className="px-1 text-lg font-semibold text-sidebar-foreground">Infolic</span>
+          <Image src="/logo-infolic.png" alt="Infolic" width={110} height={110} priority />
 
           <div className="flex flex-col gap-2">
             <span className="px-3 text-xs font-medium tracking-wide text-sidebar-foreground/50 uppercase">
