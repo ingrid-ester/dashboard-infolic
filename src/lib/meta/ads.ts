@@ -14,19 +14,18 @@ type InsightsResponse = {
   paging?: { next?: string };
 };
 
-// No lead-gen pixel/form is configured on this account yet — campaigns
-// optimize for engagement/traffic. "link_click" is the closest available
-// stand-in for "someone showed interest" until a real lead event exists
-// (see the July 2026 decision to use it as "Leads" pending CRM).
-function linkClickCount(actions?: ActionValue[]): number {
-  const action = actions?.find((a) => a.action_type === "link_click");
+// These are Messages-objective campaigns — Meta Ads Manager's own
+// "Resultados" column for that objective is messaging conversations
+// started, not link clicks (a click can bounce without ever messaging).
+function messagingConversationsStartedCount(actions?: ActionValue[]): number {
+  const action = actions?.find((a) => a.action_type === "onsite_conversion.messaging_conversation_started_7d");
   return action ? Number(action.value) : 0;
 }
 
 /**
- * Reads account-level ad spend and link clicks (used as a Leads stand-in)
- * per day for [since, until] (inclusive, "yyyy-MM-dd" strings). Follows
- * pagination in case the range is split across multiple pages.
+ * Reads account-level ad spend and messaging conversations started (used
+ * as "Leads") per day for [since, until] (inclusive, "yyyy-MM-dd" strings).
+ * Follows pagination in case the range is split across multiple pages.
  */
 export async function getDailySpend(since: string, until: string): Promise<DailySpend[]> {
   const url = new URL(
@@ -48,7 +47,11 @@ export async function getDailySpend(since: string, until: string): Promise<Daily
     }
     const body: InsightsResponse = await res.json();
     for (const row of body.data) {
-      results.push({ data: row.date_start, spend: Number(row.spend), leads: linkClickCount(row.actions) });
+      results.push({
+        data: row.date_start,
+        spend: Number(row.spend),
+        leads: messagingConversationsStartedCount(row.actions),
+      });
     }
     nextUrl = body.paging?.next ?? null;
   }

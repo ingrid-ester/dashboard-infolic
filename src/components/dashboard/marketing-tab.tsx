@@ -53,7 +53,7 @@ export function MarketingTab({
           icon={WalletIcon}
         />
         <MetricCard
-          label="Leads (cliques no link)"
+          label="Leads (conversas iniciadas)"
           value={leads}
           previousValue={previousLeads}
           icon={MousePointerClickIcon}
