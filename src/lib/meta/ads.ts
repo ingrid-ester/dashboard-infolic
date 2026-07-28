@@ -181,125 +181,46 @@ export async function getActiveVideoRetention(): Promise<VideoRetentionRow[]> {
   return results;
 }
 
-export type CreativeDailySpend = { creativeName: string; data: string; spend: number };
+export type CreativeDailySpend = { creativeName: string; data: string; spend: number; leads: number };
 
-type AdNameListResponse = {
-  data: { id: string; name: string }[];
-  paging?: { next?: string };
-};
-
-// "Criativo Identificado" (from the sheet's own Mapa_Criativos lookup) is
-// written to match the ad's real name in Meta Ads Manager, character for
-// character (modulo whitespace) — so it can be looked up directly by name,
-// no separate ID mapping table needed. More than one ad can share a name
-// (e.g. re-created after a pause), so this groups by normalized name and
-// keeps every matching ad id.
-async function getAdsByName(names: Set<string>): Promise<Map<string, string[]>> {
-  const url = new URL(`https://graph.facebook.com/${GRAPH_API_VERSION}/${getAdAccountId()}/ads`);
-  url.searchParams.set("access_token", process.env.META_ACCESS_TOKEN ?? "");
-  url.searchParams.set(
-    "effective_status",
-    JSON.stringify([
-      "ACTIVE",
-      "PAUSED",
-      "ARCHIVED",
-      "PENDING_REVIEW",
-      "DISAPPROVED",
-      "PREAPPROVED",
-      "PENDING_BILLING_INFO",
-      "CAMPAIGN_PAUSED",
-      "ADSET_PAUSED",
-      "IN_PROCESS",
-      "WITH_ISSUES",
-    ]),
-  );
-  url.searchParams.set("fields", "id,name");
-  url.searchParams.set("limit", "500");
-
-  const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
-  const wanted = new Map([...names].map((n) => [normalize(n), n]));
-  const result = new Map<string, string[]>();
-
-  let nextUrl: string | null = url.toString();
-  while (nextUrl) {
-    const res = await fetch(nextUrl);
-    if (!res.ok) {
-      throw new Error(`Meta Ads API error: ${res.status} ${await res.text()}`);
-    }
-    const body: AdNameListResponse = await res.json();
-    for (const ad of body.data) {
-      const originalName = wanted.get(normalize(ad.name));
-      if (!originalName) continue;
-      const ids = result.get(originalName) ?? [];
-      ids.push(ad.id);
-      result.set(originalName, ids);
-    }
-    nextUrl = body.paging?.next ?? null;
-  }
-
-  return result;
-}
-
-type AdSpendInsightsResponse = {
-  data: { ad_id: string; spend: string; date_start: string }[];
+type CreativeInsightsResponse = {
+  data: { ad_name: string; date_start: string; spend: string; actions?: ActionValue[] }[];
   paging?: { next?: string };
 };
 
 /**
- * Reads daily spend since `since` for exactly the given creative names —
- * matched to real ads via getAdsByName, then rolled up per name per day
- * (summing across ads that share a name).
+ * Reads daily spend + messaging conversations started per ad, for
+ * [since, until]. No CRM yet to map ads to a curated creative list, so
+ * this just groups directly by Meta's own ad name.
  */
-export async function getCreativeSpend(
-  names: Set<string>,
-  since: string,
-): Promise<CreativeDailySpend[]> {
-  const adIdsByName = await getAdsByName(names);
-  if (adIdsByName.size === 0) return [];
-
-  const adIdToName = new Map<string, string>();
-  for (const [creativeName, adIds] of adIdsByName) {
-    for (const id of adIds) adIdToName.set(id, creativeName);
-  }
-  const allAdIds = [...adIdToName.keys()];
-
+export async function getDailyCreativeSpend(since: string, until: string): Promise<CreativeDailySpend[]> {
   const url = new URL(
     `https://graph.facebook.com/${GRAPH_API_VERSION}/${getAdAccountId()}/insights`,
   );
   url.searchParams.set("access_token", process.env.META_ACCESS_TOKEN ?? "");
   url.searchParams.set("level", "ad");
-  url.searchParams.set("fields", "ad_id,spend");
+  url.searchParams.set("fields", "ad_name,spend,actions");
   url.searchParams.set("time_increment", "1");
-  url.searchParams.set("time_range", JSON.stringify({ since, until: new Date().toISOString().slice(0, 10) }));
-  url.searchParams.set("filtering", JSON.stringify([{ field: "ad.id", operator: "IN", value: allAdIds }]));
+  url.searchParams.set("time_range", JSON.stringify({ since, until }));
 
-  // creative name -> date -> spend, summed across ads that share a name.
-  // Nested maps instead of a joined string key: creative names can contain
-  // spaces, so a "name date" string key would be ambiguous to split back apart.
-  const byNameAndDate = new Map<string, Map<string, number>>();
+  const results: CreativeDailySpend[] = [];
   let nextUrl: string | null = url.toString();
   while (nextUrl) {
     const res = await fetch(nextUrl);
     if (!res.ok) {
       throw new Error(`Meta Ads API error: ${res.status} ${await res.text()}`);
     }
-    const body: AdSpendInsightsResponse = await res.json();
+    const body: CreativeInsightsResponse = await res.json();
     for (const row of body.data) {
-      const creativeName = adIdToName.get(row.ad_id);
-      if (!creativeName) continue;
-      const byDate = byNameAndDate.get(creativeName) ?? new Map<string, number>();
-      byDate.set(row.date_start, (byDate.get(row.date_start) ?? 0) + Number(row.spend));
-      byNameAndDate.set(creativeName, byDate);
+      results.push({
+        creativeName: row.ad_name,
+        data: row.date_start,
+        spend: Number(row.spend),
+        leads: messagingConversationsStartedCount(row.actions),
+      });
     }
     nextUrl = body.paging?.next ?? null;
   }
 
-  const spend: CreativeDailySpend[] = [];
-  for (const [creativeName, byDate] of byNameAndDate) {
-    for (const [data, value] of byDate) {
-      spend.push({ creativeName, data, spend: value });
-    }
-  }
-
-  return spend;
+  return results;
 }

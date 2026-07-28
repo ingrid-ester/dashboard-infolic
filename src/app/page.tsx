@@ -1,6 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { resolveComparisonPeriod, resolvePeriod } from "@/lib/dashboard/period";
-import { fetchMetaLeads, fetchMetaSpend, fetchVideoRetention } from "@/lib/dashboard/queries";
+import {
+  fetchCreativeRanking,
+  fetchDailyLeads,
+  fetchMetaLeads,
+  fetchMetaSpend,
+  fetchVideoRetention,
+} from "@/lib/dashboard/queries";
 import { computeVideoRetention } from "@/lib/dashboard/metrics";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 
@@ -27,6 +33,8 @@ export default async function Home({ searchParams }: PageProps) {
     previousInvestimento,
     leads,
     previousLeads,
+    dailyLeads,
+    creativeRanking,
     videoRetentionRows,
   ] = await Promise.all([
     supabase.auth.getUser(),
@@ -34,10 +42,13 @@ export default async function Home({ searchParams }: PageProps) {
     fetchMetaSpend(supabase, previousPeriod),
     fetchMetaLeads(supabase, period),
     fetchMetaLeads(supabase, previousPeriod),
+    fetchDailyLeads(supabase, period),
+    fetchCreativeRanking(supabase, period),
     fetchVideoRetention(supabase),
   ]);
   const cpl = leads > 0 ? investimento / leads : null;
   const previousCpl = previousLeads > 0 ? previousInvestimento / previousLeads : null;
+  const evolution = dailyLeads.map((d) => ({ data: d.data, leads: d.leads, vendas: 0, mqls: 0 }));
   const userName = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? "";
 
   const visaoGeralProps = {
@@ -53,6 +64,8 @@ export default async function Home({ searchParams }: PageProps) {
     previousLeads,
     cpl,
     previousCpl,
+    evolution,
+    creativeRanking,
     videoRetention: computeVideoRetention(videoRetentionRows),
   };
 

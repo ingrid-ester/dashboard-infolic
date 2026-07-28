@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { format } from "date-fns";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getActiveVideoRetention, getDailySpend } from "@/lib/meta/ads";
+import { getActiveVideoRetention, getDailyCreativeSpend, getDailySpend } from "@/lib/meta/ads";
 
 // Earliest day to backfill spend from. Bump forward only if you want to
 // intentionally drop older history — the sync always re-fetches from here
@@ -44,6 +44,23 @@ async function handleSync(request: Request) {
     }
   }
   summary["meta_ads_spend"] = spendRows.length;
+
+  const creativeSpendRows = await getDailyCreativeSpend(META_SPEND_SINCE, format(new Date(), "yyyy-MM-dd"));
+  if (creativeSpendRows.length > 0) {
+    const { error: creativeSpendError } = await supabase
+      .from("meta_creative_spend_raw")
+      .upsert(
+        creativeSpendRows.map((r) => ({ creative_name: r.creativeName, data: r.data, spend: r.spend, leads: r.leads })),
+        { onConflict: "creative_name,data" },
+      );
+    if (creativeSpendError) {
+      return NextResponse.json(
+        { error: `Falha ao sincronizar meta_creative_spend_raw: ${creativeSpendError.message}` },
+        { status: 500 },
+      );
+    }
+  }
+  summary["meta_creative_spend"] = creativeSpendRows.length;
 
   const videoRetentionRows = await getActiveVideoRetention();
   const { error: deleteRetentionError } = await supabase

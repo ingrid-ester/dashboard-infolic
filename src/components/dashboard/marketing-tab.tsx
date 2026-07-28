@@ -1,9 +1,12 @@
 import { MousePointerClickIcon, WalletIcon } from "lucide-react";
 
 import { MetricCard } from "@/components/dashboard/metric-card";
+import { EvolutionChart } from "@/components/dashboard/evolution-chart";
+import { PendingCard } from "@/components/dashboard/pending-card";
 import { RankingTable } from "@/components/dashboard/ranking-table";
 
-type CreativeRankingRow = { creativeName: string; investimento: number };
+type CreativeRankingRow = { creativeName: string; investimento: number; leads: number; cpl: number | null };
+type EvolutionPoint = { data: string; leads: number; vendas: number; mqls: number };
 type VideoRetentionMetric = {
   adName: string;
   campaignName: string;
@@ -22,6 +25,8 @@ type MarketingTabProps = {
   previousLeads: number;
   cpl: number | null;
   previousCpl: number | null;
+  evolution: EvolutionPoint[];
+  creativeRanking: CreativeRankingRow[];
   videoRetention: VideoRetentionMetric[];
 };
 
@@ -37,11 +42,13 @@ export function MarketingTab({
   previousLeads,
   cpl,
   previousCpl,
+  evolution,
+  creativeRanking,
   videoRetention,
 }: MarketingTabProps) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-[minmax(0,220px)_1fr]">
         <MetricCard
           label="Investimento"
           value={investimento}
@@ -49,40 +56,53 @@ export function MarketingTab({
           format={currencyFormat}
           icon={WalletIcon}
         />
-        <MetricCard
-          label="Leads (conversas iniciadas)"
-          value={leads}
-          previousValue={previousLeads}
-          icon={MousePointerClickIcon}
-        />
-        <MetricCard
-          label="CPL"
-          value={cpl}
-          previousValue={previousCpl}
-          format={currencyFormat}
-          invert
-          pendingReason="Sem leads no período"
-        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <MetricCard
+            label="Leads (conversas iniciadas)"
+            value={leads}
+            previousValue={previousLeads}
+            icon={MousePointerClickIcon}
+          />
+          <MetricCard
+            label="CPL"
+            value={cpl}
+            previousValue={previousCpl}
+            format={currencyFormat}
+            invert
+            pendingReason="Sem leads no período"
+          />
+          <MetricCard label="MQLs" value={null} pendingReason="Aguardando integração com o CRM" />
+          <MetricCard label="CPMQL" value={null} pendingReason="Aguardando integração com o CRM" />
+        </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-4">
-        <MetricCard label="Contatos de Venda" value={null} pendingReason="Aguardando integração com o CRM" />
-        <MetricCard label="MQLs" value={null} pendingReason="Aguardando integração com o CRM" />
-        <MetricCard label="CPCV" value={null} pendingReason="Aguardando integração com o CRM" />
-        <MetricCard label="CPMQL" value={null} pendingReason="Aguardando integração com o CRM" />
-      </div>
+      <EvolutionChart data={evolution} />
 
-      <RankingTable<CreativeRankingRow>
+      <PendingCard title="Status dos Leads" message="Aguardando integração com o CRM." />
+
+      <RankingTable
         title="Ranking de Criativos"
-        rows={[]}
-        emptyMessage="Aguardando integração com o CRM."
+        rows={creativeRanking}
+        rankBadge
         columns={[
           { header: "Criativo", render: (r) => r.creativeName, sortValue: (r) => r.creativeName },
+          {
+            header: "Leads",
+            align: "right",
+            render: (r) => r.leads.toLocaleString("pt-BR"),
+            sortValue: (r) => r.leads,
+          },
           {
             header: "Investimento",
             align: "right",
             render: (r) => currencyFormat(r.investimento),
             sortValue: (r) => r.investimento,
+          },
+          {
+            header: "CPL",
+            align: "right",
+            render: (r) => (r.cpl !== null ? currencyFormat(r.cpl) : "—"),
+            sortValue: (r) => r.cpl ?? -1,
           },
         ]}
       />
