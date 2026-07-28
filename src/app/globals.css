@@ -48,38 +48,39 @@
 }
 
 :root {
-  --background: oklch(0.16 0.03 250);
+  /* Client brand palette: azul claro #2B68A2, azul escuro #174888, verde #C9D20F */
+  --background: oklch(0.16 0.03 256);
   --foreground: oklch(0.97 0 0);
-  --card: oklch(0.22 0.035 250);
+  --card: oklch(0.21 0.035 256);
   --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.24 0.035 250);
+  --popover: oklch(0.23 0.035 256);
   --popover-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.773 0.153 163.223);
-  --primary-foreground: oklch(0.15 0.03 250);
-  --secondary: oklch(0.28 0.035 250);
+  --primary: oklch(0.829 0.183 112.873);
+  --primary-foreground: oklch(0.18 0.03 256);
+  --secondary: oklch(0.28 0.035 256);
   --secondary-foreground: oklch(0.97 0 0);
-  --muted: oklch(0.26 0.03 250);
-  --muted-foreground: oklch(0.68 0.02 250);
-  --accent: oklch(0.28 0.035 250);
+  --muted: oklch(0.26 0.03 256);
+  --muted-foreground: oklch(0.68 0.02 256);
+  --accent: oklch(0.506 0.112 250.058);
   --accent-foreground: oklch(0.97 0 0);
   --destructive: oklch(0.65 0.2 25);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.773 0.153 163.223 / 50%);
-  --chart-1: oklch(0.773 0.153 163.223);
-  --chart-2: oklch(0.75 0.14 220);
-  --chart-3: oklch(0.6 0.02 250);
-  --chart-4: oklch(0.45 0.02 250);
-  --chart-5: oklch(0.32 0.02 250);
+  --ring: oklch(0.829 0.183 112.873 / 50%);
+  --chart-1: oklch(0.829 0.183 112.873);
+  --chart-2: oklch(0.506 0.112 250.058);
+  --chart-3: oklch(0.6 0.02 256);
+  --chart-4: oklch(0.45 0.02 256);
+  --chart-5: oklch(0.32 0.02 256);
   --radius: 1rem;
-  --sidebar: oklch(0.12 0.03 250);
+  --sidebar: oklch(0.12 0.03 256);
   --sidebar-foreground: oklch(0.97 0 0);
-  --sidebar-primary: oklch(0.773 0.153 163.223);
-  --sidebar-primary-foreground: oklch(0.15 0.03 250);
-  --sidebar-accent: oklch(0.24 0.035 250);
+  --sidebar-primary: oklch(0.829 0.183 112.873);
+  --sidebar-primary-foreground: oklch(0.18 0.03 256);
+  --sidebar-accent: oklch(0.24 0.035 256);
   --sidebar-accent-foreground: oklch(0.97 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.773 0.153 163.223 / 50%);
+  --sidebar-ring: oklch(0.829 0.183 112.873 / 50%);
 }
 
 @layer base {
