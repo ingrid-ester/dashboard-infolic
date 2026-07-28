@@ -25,20 +25,6 @@ export async function fetchMetaLeads(supabase: SupabaseClient, period: Period): 
   return (data ?? []).reduce((sum, row) => sum + Number(row.leads), 0);
 }
 
-export type DailySpendPoint = { data: string; spend: number; leads: number };
-
-export async function fetchDailySpend(supabase: SupabaseClient, period: Period): Promise<DailySpendPoint[]> {
-  const { data, error } = await supabase
-    .from("meta_ads_spend_raw")
-    .select("data, spend, leads")
-    .gte("data", period.from)
-    .lte("data", period.to)
-    .order("data", { ascending: true });
-
-  if (error) throw error;
-  return (data ?? []).map((row) => ({ data: row.data, spend: Number(row.spend), leads: Number(row.leads) }));
-}
-
 export type VideoRetentionRow = {
   ad_id: string;
   ad_name: string;

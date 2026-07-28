@@ -1,10 +1,9 @@
 import { MousePointerClickIcon, WalletIcon } from "lucide-react";
 
 import { MetricCard } from "@/components/dashboard/metric-card";
-import { SpendChart } from "@/components/dashboard/spend-chart";
 import { RankingTable } from "@/components/dashboard/ranking-table";
 
-type DailySpendPoint = { data: string; spend: number; leads: number };
+type CreativeRankingRow = { creativeName: string; investimento: number };
 type VideoRetentionMetric = {
   adName: string;
   campaignName: string;
@@ -23,7 +22,6 @@ type MarketingTabProps = {
   previousLeads: number;
   cpl: number | null;
   previousCpl: number | null;
-  dailySpend: DailySpendPoint[];
   videoRetention: VideoRetentionMetric[];
 };
 
@@ -39,7 +37,6 @@ export function MarketingTab({
   previousLeads,
   cpl,
   previousCpl,
-  dailySpend,
   videoRetention,
 }: MarketingTabProps) {
   return (
@@ -68,7 +65,27 @@ export function MarketingTab({
         />
       </div>
 
-      <SpendChart data={dailySpend} />
+      <div className="grid gap-4 sm:grid-cols-4">
+        <MetricCard label="Contatos de Venda" value={null} pendingReason="Aguardando integração com o CRM" />
+        <MetricCard label="MQLs" value={null} pendingReason="Aguardando integração com o CRM" />
+        <MetricCard label="CPCV" value={null} pendingReason="Aguardando integração com o CRM" />
+        <MetricCard label="CPMQL" value={null} pendingReason="Aguardando integração com o CRM" />
+      </div>
+
+      <RankingTable<CreativeRankingRow>
+        title="Ranking de Criativos"
+        rows={[]}
+        emptyMessage="Aguardando integração com o CRM."
+        columns={[
+          { header: "Criativo", render: (r) => r.creativeName, sortValue: (r) => r.creativeName },
+          {
+            header: "Investimento",
+            align: "right",
+            render: (r) => currencyFormat(r.investimento),
+            sortValue: (r) => r.investimento,
+          },
+        ]}
+      />
 
       <RankingTable
         title="Retenção de Vídeo (Anúncios Ativos)"
