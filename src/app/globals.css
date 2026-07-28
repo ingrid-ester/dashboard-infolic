@@ -82,7 +82,7 @@
   --sidebar-border: oklch(1 0 0 / 14%);
   --sidebar-ring: oklch(0.829 0.183 112.873 / 50%);
   --gradient-brand: linear-gradient(135deg, oklch(0.506 0.112 250.058), oklch(0.829 0.183 112.873));
-  --gradient-page: radial-gradient(circle at 20% 0%, oklch(0.2 0.04 256), oklch(0.13 0.03 256) 60%);
+  --gradient-page: linear-gradient(160deg, oklch(0.34 0.07 224) 0%, oklch(0.18 0.045 250) 45%, oklch(0.09 0.025 256) 100%);
 }
 
 @layer base {
