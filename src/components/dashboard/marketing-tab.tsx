@@ -6,7 +6,7 @@ import { PendingCard } from "@/components/dashboard/pending-card";
 import { RankingTable } from "@/components/dashboard/ranking-table";
 
 type CreativeRankingRow = { creativeName: string; investimento: number; leads: number; cpl: number | null };
-type EvolutionPoint = { data: string; leads: number; vendas: number; mqls: number };
+type EvolutionPoint = { data: string; leads: number; vendas: number; sqls: number };
 type VideoRetentionMetric = {
   adName: string;
   campaignName: string;
@@ -71,8 +71,8 @@ export function MarketingTab({
             invert
             pendingReason="Sem leads no período"
           />
-          <MetricCard label="MQLs" value={null} pendingReason="Aguardando integração com o CRM" />
-          <MetricCard label="CPMQL" value={null} pendingReason="Aguardando integração com o CRM" />
+          <MetricCard label="SQLs" value={null} pendingReason="Aguardando integração com o CRM" />
+          <MetricCard label="CPSQL" value={null} pendingReason="Aguardando integração com o CRM" />
         </div>
       </div>
 

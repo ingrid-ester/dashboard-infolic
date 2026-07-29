@@ -48,7 +48,7 @@ export default async function Home({ searchParams }: PageProps) {
   ]);
   const cpl = leads > 0 ? investimento / leads : null;
   const previousCpl = previousLeads > 0 ? previousInvestimento / previousLeads : null;
-  const evolution = dailyLeads.map((d) => ({ data: d.data, leads: d.leads, vendas: 0, mqls: 0 }));
+  const evolution = dailyLeads.map((d) => ({ data: d.data, leads: d.leads, vendas: 0, sqls: 0 }));
   const userName = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? "";
 
   const visaoGeralProps = {

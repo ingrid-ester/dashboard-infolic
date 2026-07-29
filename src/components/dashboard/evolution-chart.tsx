@@ -16,7 +16,7 @@ import {
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-type EvolutionPoint = { data: string; leads: number; vendas: number; mqls: number };
+type EvolutionPoint = { data: string; leads: number; vendas: number; sqls: number };
 
 export function EvolutionChart({ data }: { data: EvolutionPoint[] }) {
   const chartData = data.map((point) => ({
@@ -27,8 +27,8 @@ export function EvolutionChart({ data }: { data: EvolutionPoint[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Evolução: Leads, MQLs e Vendas</CardTitle>
-        <CardDescription>Vendas e MQLs aguardando integração com o CRM — aparecem zerados por enquanto.</CardDescription>
+        <CardTitle>Evolução: Leads, SQLs e Vendas</CardTitle>
+        <CardDescription>Vendas e SQLs aguardando integração com o CRM — aparecem zerados por enquanto.</CardDescription>
       </CardHeader>
       <CardContent>
         {chartData.length === 0 ? (
@@ -67,8 +67,8 @@ export function EvolutionChart({ data }: { data: EvolutionPoint[] }) {
                 />
                 <Line
                   type="monotone"
-                  dataKey="mqls"
-                  name="MQLs"
+                  dataKey="sqls"
+                  name="SQLs"
                   stroke="var(--chart-3)"
                   strokeWidth={2}
                   dot={false}
